@@ -1,0 +1,9 @@
+<div id="video" style="position: relative">
+          <!--<span @click="refreshVideo" style="position: absolute;top: 0px;right: -80px;z-index: 1000;cursor: pointer" title="刷新实时画面"><img src="../../../static/images/RefreshPage.png" style='width: 15%' alt=""></span>-->
+          <!-- <bh-player :m3u8Url="rtmpUrl"></bh-player> -->
+          <div id="video-js" v-if="rtmpUrl" style="width: 100%; height: 100%; position: relative;">
+          <!-- <Videojs :videojsData="{source:'http://172.17.13.136:8002/live?app=live&stream=test',videoId:''}"></Videojs></div> -->
+          <Videojs :videojsData="{source:rtmpUrl,videoId:''}"></Videojs></div>
+          <div style="text-align: left; margin-top: 5px;white-space: normal;word-wrap: break-word;word-break: break-all;">
+              {{ rtmpUrl }}</div>
+        </div>
