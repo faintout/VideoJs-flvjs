@@ -15,18 +15,38 @@
 </div>
 
 <body>
-    <script type="text/javascript" src="./videojs/video.js"></script>
+    <!-- <script type="text/javascript" src="./videojs/video.js"></script> -->
+    <script type="text/javascript" src="./videojs/video-7.11.8.js"></script>
     <script type="text/javascript" src="./videojs/videojs-flvjs.js"></script>
     <script type="text/javascript" src="./videojs/videojs-flash.min.js"></script>
     <script type="text/javascript" src="./videojs/flv.js"></script>
-    <script type="text/javascript" ></script>
+    <script type="text/javascript"></script>
     <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.js"></script>
     <script>
+        /**
+        * 根据播放地址格式mp4,rtmp,hls,flv，返回对应的source type值
+        */
+        function getSourceType(url) {
+            if (url.match(/rtmp\:|RTMP\:/)) {
+                // rtmp流
+                return "rtmp/flv";
+            }
+            if (url.match(/\.m3u8|\.M3U8/)) {
+                // hls流
+                return "application/x-mpegURL";
+            }
+            if (url.match(/\.flv|\.FLV/)) {
+                // flv流
+                return "video/x-flv";
+            }
+            // 其他流
+            return "video/mp4";
+        }
         $('.btn').click(
             // let vm = this;
             // 创建video标签
-           ()=> {
-        var url = '';
+            () => {
+                var url = '';
                 url = $('#_url').val()
                 console.log(url)
                 //获取地址信息
@@ -54,71 +74,73 @@
                     techOrder = ["flash", "html5", "flvjs"]
                 }
                 //   console.log(techOrder)
-               videojs =  new videojs(
+                videojs = new videojs(
                     document.getElementById("videojs"), {
-                        controls: true, // 是否显示控制条
-                        preload: "none",
-                        liveui: true,
-                        autoplay: true,
-                        fluid: true, // 自适应宽高
-                        language: "zh-CN", // 设置语言
-                        muted: true, // 是否静音
-                        inactivityTimeout: false,
-                        flash: {
-                            swf: "./videojs/video-js.swf",
-                        },
-                        techOrder: techOrder,
-                        techName: "flash",
-                        flvjs: {
-                            mediaDataSource: {
-                                // hasAudio: false,
-                                // isLive: false,
-                                // cors: true,
-                                // withCredentials: false,
-                            },
-                        },
-                        // hasAudio:false,
+                    controls: true, // 是否显示控制条
+                    preload: "none",
+                    liveui: true,
+                    autoplay: true,
+                    fluid: true, // 自适应宽高
+                    language: "zh-CN", // 设置语言
+                    muted: true, // 是否静音
+                    inactivityTimeout: false,
+                    flash: {
+                        swf: "./videojs/video-js.swf",
+                    },
+                    techOrder: techOrder,
+                    techName: "flash",
+                    flvjs: {
                         mediaDataSource: {
                             // hasAudio: false,
-                            isLive: false,
-                            cors: true,
+                            // isLive: false,
+                            // cors: true,
+                            // withCredentials: false,
                         },
-                        controlBar: {
-                            // 设置控制条组件
-                            // 设置控制条里面组件的相关属性及显示与否
-                            currentTimeDisplay: true,
-                            timeDivider: true,
-                            durationDisplay: true,
-                            remainingTimeDisplay: false,
-                            volumePanel: {
-                                inline: false,
+                    },
+                    // hasAudio:false,
+                    mediaDataSource: {
+                        // hasAudio: false,
+                        isLive: false,
+                        cors: true,
+                    },
+                    controlBar: {
+                        // 设置控制条组件
+                        // 设置控制条里面组件的相关属性及显示与否
+                        currentTimeDisplay: true,
+                        timeDivider: true,
+                        durationDisplay: true,
+                        remainingTimeDisplay: false,
+                        volumePanel: {
+                            inline: false,
+                        },
+                        /* 使用children的形式可以控制每一个控件的位置，以及显示与否 */
+                        children: [
+                            { name: "playToggle" }, // 播放按钮
+                            { name: "currentTimeDisplay" }, // 当前已播放时间
+                            { name: "progressControl" }, // 播放进度条
+                            { name: "durationDisplay" }, // 总时间
+                            // {
+                            //   // 倍数播放
+                            //   name: "playbackRateMenuButton",
+                            //   playbackRates: [0.5, 1, 1.5, 2, 2.5],
+                            // },
+                            {
+                                name: "volumePanel", // 音量控制
+                                inline: false, // 不使用水平方式
                             },
-                            /* 使用children的形式可以控制每一个控件的位置，以及显示与否 */
-                            children: [
-                                { name: "playToggle" }, // 播放按钮
-                                { name: "currentTimeDisplay" }, // 当前已播放时间
-                                { name: "progressControl" }, // 播放进度条
-                                { name: "durationDisplay" }, // 总时间
-                                // {
-                                //   // 倍数播放
-                                //   name: "playbackRateMenuButton",
-                                //   playbackRates: [0.5, 1, 1.5, 2, 2.5],
-                                // },
-                                {
-                                    name: "volumePanel", // 音量控制
-                                    inline: false, // 不使用水平方式
-                                },
-                                { name: "FullscreenToggle" }, // 全屏
-                            ],
-                        },
-                        // sources: playSources,
-                        sources: [
-                          {
-                            src: url,
-                            type: "video/x-flv",
-                          },
+                            { name: "FullscreenToggle" }, // 全屏
                         ],
                     },
+                    // sources: playSources,
+                    sources: [
+                        {
+                            src: url,
+                            //这块根据播放地址匹配所需的播放格式，注意这里的格式必须选对，否则会造成无法播放。
+                            type: getSourceType(url),
+                        },
+                    ],
+                },
+
                     function onPlayerReady() {
                         console.log("视频可以播放了", this);
                     }
