@@ -9,6 +9,7 @@
      *   source：视频地址；
      *   videoId：播放器ID；
      */
+     import { debounce } from './toolUtils.js'
     export default {
         props: {
             videojsData: {
@@ -23,6 +24,8 @@
             return {
                 Player: null,
                 setRestart: false,
+                //存储节流对象
+                debounceObj:undefined
             };
         },
         watch: {
@@ -151,14 +154,20 @@
                         // 设置重新初始化播放器定时器：30s
                         this.on("waiting", function() {
                             console.log("waiting")
-                            vm.setRestart = setInterval((setRestart) => {
-                                this.src(playSources);
-                            }, 5 * 1000, vm.setRestart);
+                            // vm.setRestart = setInterval((setRestart) => {
+                            //     this.src(playSources);
+                            // }, 5 * 1000, vm.setRestart);
+                            vm.debounceReplay(()=>{
+                                this.src(playSources)
+                            })
                         })
                         this.on("playing", function() {
                             console.log("playing")
-                            clearInterval(vm.setRestart);
-                            vm.setRestart = false
+                            vm.debounceObj&&vm.debounceReplay(()=>{
+                               vm.debounceObj = undefined
+                            })
+                            // clearInterval(vm.setRestart);
+                            // vm.setRestart = false
                         })
                         //   let initTimeouthandler = setTimeout(() => {
                         //     this.src(playSources);
@@ -175,7 +184,14 @@
                     }
                 );
             },
-
+             //节流重连机制
+            debounceReplay(callback,times=1000*10) {
+                console.log('截留函数干预')
+                this.debounceObj = debounce(() => {
+                    callback()
+                }, times)
+                this.debounceObj()
+            },
             /**
              * 更改播放器播放地址
              */
